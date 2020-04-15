@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    android:orientation="vertical"
+    android:padding="12dp"
+    tools:context=".menu.SettingDataModel2">
+
+    <TextView
+        android:id="@+id/settingData2NoSub"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:textColor="@android:color/white"
+        android:visibility="gone"
+        android:text="No SubCategory"/>
+
+    <TextView
+        android:id="@+id/settingData2Label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/white"
+        android:text="Category"/>
+    <org.angmarch.views.NiceSpinner
+        android:id="@+id/settingData2Cat"
+        android:layout_below="@+id/settingData2Label"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:backgroundTint="#E6E6E6"
+        app:arrowTint="#D55675"
+        app:popupTextAlignment="start"/>
+    <TextView
+        android:id="@+id/settingData2Label2"
+        android:layout_below="@+id/settingData2Cat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="@android:color/white"
+        android:text="List Sub Category"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/settingData2RV"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/settingData2Label2"
+        android:layout_marginTop="4dp" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/settingData2Fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="8dp"
+        android:src="@drawable/ic_add"
+        app:maxImageSize="36dp"
+        app:tint="@color/colorPrimaryDark"/>
+</RelativeLayout>

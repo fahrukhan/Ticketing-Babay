@@ -1,44 +1,34 @@
 package com.fahru.ticketingbabay.menu;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Context;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
-
-import com.fahru.ticketingbabay.DB.BaseModel;
+import com.fahru.ticketingbabay.model.BaseModel;
 import com.fahru.ticketingbabay.DB.DBHandler;
-import com.fahru.ticketingbabay.MainActivity;
 import com.fahru.ticketingbabay.R;
 import com.google.android.material.textfield.TextInputEditText;
-
 import org.angmarch.views.NiceSpinner;
 import org.angmarch.views.OnSpinnerItemSelectedListener;
-
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Locale;
 
 public class CreateNewTicket extends BaseModel implements OnSpinnerItemSelectedListener {
     TextInputEditText ipAdd;
     NiceSpinner locSpin, deptSpin, catSpin, subCatSpin, orderBySpin, priorSpin, assignSpin, statSpin;
-    ArrayList<String> locArr, deptArr, catArr, subCatArr, ordArr, prioArr, assignArr, statArr;
+    ArrayList<String> locArr, deptArr, catArr, subCatArr, ordArr, prioArr, assignArr, statArr,
+    catIdArr;
     DBHandler db;
-    int CAT_SELECTED = 1;
+    String CAT_SELECTED;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_new_ticket);
-
         db = new DBHandler(this);
         initialize(this);
         populateDataForSpinner();
-
-
         addFilterToIPAddressInput();
     }
 
@@ -78,13 +68,14 @@ public class CreateNewTicket extends BaseModel implements OnSpinnerItemSelectedL
         deptSpin = findViewById(R.id.createNewTicketDepartment);
         catSpin = findViewById(R.id.createNewTicketCategory);
         subCatSpin = findViewById(R.id.createNewTicketSubCategory);
-        orderBySpin =findViewById(R.id.createNewTicketOrderBy);
+        orderBySpin = findViewById(R.id.createNewTicketOrderBy);
         priorSpin = findViewById(R.id.createNewTicketPriority);
         assignSpin = findViewById(R.id.createNewTicketAssignTo);
         statSpin = findViewById(R.id.createNewTicketStatus);
         locArr = new ArrayList<>();
         deptArr = new ArrayList<>();
         catArr = new ArrayList<>();
+        catIdArr = new ArrayList<>();
         subCatArr = new ArrayList<>();
         ordArr = new ArrayList<>();
         prioArr = new ArrayList<>();
@@ -92,35 +83,31 @@ public class CreateNewTicket extends BaseModel implements OnSpinnerItemSelectedL
         statArr = new ArrayList<>();
     }
 
-    private void populateDataForSpinner(){
+    private void populateDataForSpinner() {
         //location spinner
         locArr.add("Pilih");
-        locArr.addAll(db.getAllRecordInOneColumn("SELECT name FROM "+TBL_LOCATION+" ORDER BY name"));
+        locArr.addAll(db.getRecordInOneColumnByField("name", TBL_LOCATION, "name"));
         ArrayAdapter<String> locAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, locArr);
         locAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         locSpin.setAdapter(locAdapter);
         locSpin.setOnSpinnerItemSelectedListener(this);
         //Department spinner
         deptArr.add("Pilih");
-        deptArr.addAll(db.getAllRecordInOneColumn("SELECT name FROM "+TBL_DEPARTMENT+" ORDER BY name"));
+        deptArr.addAll(db.getRecordInOneColumnByField("name", TBL_DEPARTMENT, "name"));
         ArrayAdapter<String> depAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, deptArr);
         depAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         deptSpin.setAdapter(depAdapter);
         deptSpin.setOnSpinnerItemSelectedListener(this);
         //Category spinner
-        catArr.addAll(db.getAllRecordInOneColumn("SELECT name FROM "+TBL_CAT+" ORDER BY name"));
+        catIdArr.addAll(db.getRecordInOneColumnByField("id", TBL_CAT, "name"));
+        catArr.addAll(db.getRecordInOneColumnByField("name", TBL_CAT, "name"));
         ArrayAdapter<String> catAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, catArr);
         catAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         catSpin.setAdapter(catAdapter);
         catSpin.setOnSpinnerItemSelectedListener(this);
-        //Sub Category spinner
-        subCatArr.addAll(db.getAllRecordInOneColumn("SELECT name FROM "+TBL_SUB+" WHERE id_category = "+CAT_SELECTED+" ORDER BY name"));
-        ArrayAdapter<String> subCatAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, subCatArr);
-        subCatAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        subCatSpin.setAdapter(subCatAdapter);
-        subCatSpin.setOnSpinnerItemSelectedListener(this);
+
         //Order By
-        ordArr.addAll(db.getAllRecordInOneColumn("SELECT name FROM "+TBL_ORDER_BY+" ORDER BY name"));
+        ordArr.addAll(db.getAllRecordInOneColumn("SELECT name FROM " + TBL_ORDER_BY + " ORDER BY name"));
         ArrayAdapter<String> ordAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, ordArr);
         ordAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         orderBySpin.setAdapter(ordAdapter);
@@ -132,7 +119,7 @@ public class CreateNewTicket extends BaseModel implements OnSpinnerItemSelectedL
         priorSpin.setAdapter(priAdapter);
         priorSpin.setOnSpinnerItemSelectedListener(this);
         //Assign By
-        assignArr.addAll(db.getAllRecordInOneColumn("SELECT name FROM "+TBL_IT_SUPPORT+" ORDER BY name"));
+        assignArr.addAll(db.getAllRecordInOneColumn("SELECT name FROM " + TBL_IT_SUPPORT + " ORDER BY name"));
         ArrayAdapter<String> assignAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, assignArr);
         assignAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         assignSpin.setAdapter(assignAdapter);
@@ -142,20 +129,34 @@ public class CreateNewTicket extends BaseModel implements OnSpinnerItemSelectedL
         statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         statSpin.setAdapter(statusAdapter);
         statSpin.setOnSpinnerItemSelectedListener(this);
+    }
+
+    private void setSubCategory(String fk){
+        if (subCatArr.size() > 0){
+            subCatArr.clear();
+        }
+        //Sub Category spinner
+        subCatArr.addAll(db.getAllRecordInOneColumn("SELECT name FROM "+TBL_SUB+" WHERE fk = "+fk+" ORDER BY name"));
+        ArrayAdapter<String> subCatAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_spinner_item, subCatArr);
+        subCatAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        subCatSpin.setAdapter(subCatAdapter);
+        subCatSpin.setOnSpinnerItemSelectedListener(this);
+
 
     }
 
     @Override
     public void onItemSelected(NiceSpinner parent, View view, int position, long id) {
-        switch (parent.getId()){
+        switch (parent.getId()) {
             case R.id.createNewTicketLocation:
-                Toast.makeText(this, "location", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, String.valueOf(position), Toast.LENGTH_SHORT).show();
                 break;
             case R.id.createNewTicketDepartment:
-                 Toast.makeText(this, "depxart", Toast.LENGTH_SHORT).show();
-                 break;
+                Toast.makeText(this, "depxart", Toast.LENGTH_SHORT).show();
+                break;
             case R.id.createNewTicketCategory:
-                Toast.makeText(this, catArr.get(position)+view.getId(), Toast.LENGTH_SHORT).show();
+                CAT_SELECTED =catIdArr.get(position);
+                setSubCategory(CAT_SELECTED);
                 break;
         }
     }

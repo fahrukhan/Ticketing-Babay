@@ -1,14 +1,11 @@
 package com.fahru.ticketingbabay;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.fahru.ticketingbabay.DB.BaseModel;
+import com.fahru.ticketingbabay.model.BaseModel;
 import com.fahru.ticketingbabay.DB.DBHandler;
 import com.fahru.ticketingbabay.menu.CreateNewTicket;
 import com.google.android.material.button.MaterialButton;
@@ -17,6 +14,7 @@ public class MainActivity extends BaseModel implements View.OnClickListener {
     ImageView settings;
     MaterialButton createTicket;
     DBHandler db;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

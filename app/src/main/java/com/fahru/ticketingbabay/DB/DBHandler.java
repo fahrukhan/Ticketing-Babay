@@ -1,13 +1,20 @@
 package com.fahru.ticketingbabay.DB;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import com.fahru.ticketingbabay.object.ItemModel1;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DBHandler extends SQLiteOpenHelper {
     private static final String DB = "database";
@@ -15,13 +22,12 @@ public class DBHandler extends SQLiteOpenHelper {
     ArrayList<String> result;
 
     //for SQLite table
-    private final String TBL_LOCATION = "location";
+    protected final String TBL_LOCATION = "location";
     protected final String TBL_DEPARTMENT = "department";
     protected final String TBL_CAT = "category";
     protected final String TBL_SUB = "sub_category";
     protected final String TBL_ORDER_BY = "order_by";
     protected final String TBL_IT_SUPPORT = "it_support";
-    protected final String TBL_STATUS= "status";
 
     public DBHandler(@Nullable Context context) {
         super(context, DB, null, DB_VERSION);
@@ -51,10 +57,10 @@ public class DBHandler extends SQLiteOpenHelper {
                 " ('Software Problem')";
         db.execSQL(inCat);
         //Sub Category
-        String query_subCat = "CREATE TABLE "+TBL_SUB+" (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, name TEXT NOT NULL, id_category INTEGER NOT NULL)";
+        String query_subCat = "CREATE TABLE "+TBL_SUB+" (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, name TEXT NOT NULL, fk INTEGER NOT NULL)";
         db.execSQL(query_subCat);
         String inSub = "INSERT INTO "+TBL_SUB+
-                " (name, id_category) VALUES" +
+                " (name, fk) VALUES" +
                 " ('Akses', 1)";
         db.execSQL(inSub);
         //Order By
@@ -71,13 +77,6 @@ public class DBHandler extends SQLiteOpenHelper {
                 " (name) VALUES" +
                 " ('Nuryadin')";
         db.execSQL(inAssign);
-        //Status
-//        String query_stat = "CREATE TABLE "+TBL_STATUS+" (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, name TEXT NOT NULL)";
-//        db.execSQL(query_stat);
-//        String inStat = "INSERT INTO "+TBL_STATUS+
-//                " (name, id_category) VALUES" +
-//                " ('Primary Phone')";
-//        db.execSQL(inStat);
     }
 
     @Override
@@ -85,13 +84,80 @@ public class DBHandler extends SQLiteOpenHelper {
 
     }
 
-    public String getRecord(String query){
-        String result = "";
+    public Map<Integer, String[]> getAllRecordModel1(String table){
+        Map<Integer ,String[]> data = new HashMap<>();
+        String query = "SELECT * FROM "+table+" ORDER BY name";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+        cursor.moveToFirst();
+        int i =0;
+        while (!cursor.isAfterLast()){
+            String[] value = {cursor.getString(0),cursor.getString(1)};
+            data.put(i, value);
+            i++;
+            cursor.moveToNext();
+        }
+        return data;
+    }
+
+    public Map<Integer, String[]> getAllRecordModel2WhereId(String table, String id){
+        Map<Integer ,String[]> data = new HashMap<>();
+        String query = "SELECT * FROM "+table+" WHERE fk = "+id+" ORDER BY name";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+        cursor.moveToFirst();
+        int i =0;
+        while (!cursor.isAfterLast()){
+            String[] value = {cursor.getString(0),cursor.getString(1)};
+            data.put(i, value);
+            i++;
+            cursor.moveToNext();
+        }
+        return data;
+    }
+
+    public void insertRecordModel1(String table, String value){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("name", value);
+        db.insert(table, null, values);
+        db.close();
+    }
+
+    public void insertRecordModel2(String table, String value, String fk){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("name", value);
+        values.put("fk", fk);
+        db.insert(table, null, values);
+        db.close();
+    }
+
+    public void updateRecord(String table, String id, String value){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("name", value);
+
+        db.update(table, values,"id=?", new String[]{id});
+        db.close();
+    }
+
+    public void deleteRecord(String table, String id){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(table, "id=?", new String[]{id});
+        db.close();
+    }
+
+    public ArrayList<String> getRecordInOneColumnByField(String field, String table,String order){
+        result = new ArrayList<>();
+        String query = "SELECT "+field+" FROM "+table+" ORDER BY "+order;
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(query, null);
         cursor.moveToFirst();
         while (!cursor.isAfterLast()){
-            result = cursor.getString(0);
+            for (int i=1; i<=cursor.getColumnCount(); i++){
+                result.add(cursor.getString(i-1));
+            }
             cursor.moveToNext();
         }
         return result;
