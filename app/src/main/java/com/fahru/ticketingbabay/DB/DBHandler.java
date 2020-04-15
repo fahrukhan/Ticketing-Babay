@@ -124,6 +124,7 @@ public class DBHandler extends SQLiteOpenHelper {
         db.close();
     }
 
+    //inset with condition
     public void insertRecordModel2(String table, String value, String fk){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
